@@ -1,6 +1,5 @@
 /* eslint-disable no-console, no-use-before-define */
 
-import path from 'path'
 import Express from 'express'
 import qs from 'qs'
 
@@ -25,10 +24,7 @@ const compiler = webpack(webpackConfig)
 app.use(webpackDevMiddleware(compiler, { noInfo: true, publicPath: webpackConfig.output.publicPath }))
 app.use(webpackHotMiddleware(compiler))
 
-// This is fired every time the server side receives a request
-app.use(handleRender)
-
-function handleRender(req, res) {
+const handleRender = (req, res) => {
   // Query our mock API asynchronously
   fetchCounter(apiResult => {
     // Read the counter from the request, if provided
@@ -56,7 +52,10 @@ function handleRender(req, res) {
   })
 }
 
-function renderFullPage(html, preloadedState) {
+// This is fired every time the server side receives a request
+app.use(handleRender)
+
+const renderFullPage = (html, preloadedState) => {
   return `
     <!doctype html>
     <html>
@@ -66,7 +65,7 @@ function renderFullPage(html, preloadedState) {
       <body>
         <div id="app">${html}</div>
         <script>
-          window.__PRELOADED_STATE__ = ${JSON.stringify(preloadedState)}
+          window.__PRELOADED_STATE__ = ${JSON.stringify(preloadedState).replace(/</g, '\\x3c')}
         </script>
         <script src="/static/bundle.js"></script>
       </body>
